@@ -1,0 +1,23 @@
+# Environnement virtuel Python
+.venv/
+venv/
+
+# Fichiers Python
+__pycache__/
+*.py[cod]
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# Variables d'environnement
+.env
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# Logs
+*.log
