@@ -22,6 +22,7 @@ def user_detail(request):
     if hasattr(user, 'candidat'):
         data['candidat_id'] = user.candidat.id
     return Response(data)
+
 class InscriptionView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (permissions.AllowAny,)

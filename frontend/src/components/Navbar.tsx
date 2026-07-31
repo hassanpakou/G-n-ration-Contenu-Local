@@ -41,6 +41,9 @@ export default function Navbar() {
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
               <span className="text-sm bg-primary-700 px-2 py-1 rounded">{user?.email}</span>
+              <Link href="/dashboard" className="hover:text-gold-400">
+    Dashboard
+  </Link>
               <button onClick={logout} className="flex items-center gap-1 hover:text-gold-400">
                 <LogOut size={16} /> Déconnexion
               </button>

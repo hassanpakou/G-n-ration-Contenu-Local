@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, get_user_model
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from candidatures.models import Candidat
 
+# Serializer d'inscription (déjà existant)
 class InscriptionSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
     password2 = serializers.CharField(write_only=True, min_length=8)
@@ -32,7 +35,6 @@ class InscriptionSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # Extraire les champs du profil candidat
         profil_data = {
             'nom': validated_data.pop('nom'),
             'prenom': validated_data.pop('prenom'),
@@ -45,15 +47,47 @@ class InscriptionSerializer(serializers.ModelSerializer):
             'domaine_etude': validated_data.pop('domaine_etude'),
             'experience_professionnelle': validated_data.pop('experience_professionnelle', ''),
         }
-
-        # Créer l'utilisateur
         password = validated_data.pop('password2')
         validated_data.pop('password')
         user = User.objects.create_user(
-            username=validated_data['email'],  # On utilise l'email comme username
+            username=validated_data['email'],
             email=validated_data['email'],
             password=password
         )
-        # Créer le candidat associé
         Candidat.objects.create(user=user, email=validated_data['email'], **profil_data)
         return user
+
+# Serializer de connexion avec email
+class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
+    email = serializers.EmailField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields.pop('username')
+        self.fields['email'] = serializers.EmailField()
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        if email and password:
+            User = get_user_model()
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                raise serializers.ValidationError('Aucun compte avec cet email.')
+
+            user = authenticate(request=self.context.get('request'),
+                                username=user.username,
+                                password=password)
+            if not user:
+                raise serializers.ValidationError('Mot de passe incorrect.')
+        else:
+            raise serializers.ValidationError('Email et mot de passe requis.')
+
+        refresh = self.get_token(user)
+        data = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+        return data
