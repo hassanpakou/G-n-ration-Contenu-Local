@@ -3,6 +3,43 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from candidatures.models import Candidat
+from rest_framework import serializers
+from candidatures.models import Candidat
+from django.contrib.auth.models import User
+
+class CandidatProfileSerializer(serializers.ModelSerializer):
+    # Champs User modifiables
+    email = serializers.EmailField(source='user.email')
+    first_name = serializers.CharField(source='user.first_name', required=False, allow_blank=True)
+    last_name = serializers.CharField(source='user.last_name', required=False, allow_blank=True)
+
+    class Meta:
+        model = Candidat
+        fields = [
+            'id', 'email', 'first_name', 'last_name',
+            'nom', 'prenom', 'telephone', 'date_naissance',
+            'sexe', 'province_residence', 'diplome', 'etablissement',
+            'domaine_etude', 'experience_professionnelle',
+        ]
+        read_only_fields = ['id', 'email']  # email non modifiable directement
+
+    def update(self, instance, validated_data):
+        # Mise à jour des champs User
+        user_data = validated_data.pop('user', {})
+        user = instance.user
+        if 'email' in user_data:
+            user.email = user_data['email']
+        if 'first_name' in user_data:
+            user.first_name = user_data['first_name']
+        if 'last_name' in user_data:
+            user.last_name = user_data['last_name']
+        user.save()
+
+        # Mise à jour des champs Candidat
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
 
 # Serializer d'inscription (déjà existant)
 class InscriptionSerializer(serializers.ModelSerializer):

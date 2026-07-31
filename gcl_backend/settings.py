@@ -1,21 +1,19 @@
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+import dj_database_url
 from datetime import timedelta
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+load_dotenv()  # charge les variables depuis .env
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+# Variables sensibles lues depuis l'environnement
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6c_2(&%2oiee#ctuwh)v-6qesuxw8*0#xrd-7dr$+2%@bgijl9'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['localhost','127.0.0.1']
-
 
 # Application definition
 
@@ -74,19 +72,23 @@ WSGI_APPLICATION = 'gcl_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gcl_db',
-        'USER': 'gcl_user',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'gcl_db',
+            'USER': 'gcl_user',
+            'PASSWORD': os.getenv('MYSQL_PASSWORD', ''),
+            'HOST': 'localhost',
+            'PORT': '3306',
+            'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"},
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': dj_database_url.config(env='DATABASE_URL')
+    }
 
 
 # Password validation
@@ -123,8 +125,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
