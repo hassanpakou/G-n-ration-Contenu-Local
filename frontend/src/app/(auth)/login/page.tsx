@@ -18,9 +18,10 @@ export default function LoginPage() {
       await login(email, password);
       toast.success('Connexion réussie');
       router.push('/');
-    } catch (err) {
-      toast.error('Erreur de connexion');
-    } finally {
+    } catch (err: any) {
+  const msg = err.response?.data?.detail || 'Email ou mot de passe incorrect.';
+  toast.error(msg);
+} finally {
       setLoading(false);
     }
   };

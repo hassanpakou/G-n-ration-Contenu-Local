@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { AxiosError } from 'axios';
@@ -18,16 +18,16 @@ interface IFormInput {
   note_intention: string;
   cv: FileList;
   diplome_fichier: FileList;
-  prototype?: FileList;
+  prototype?: FileList | null; // on utilisera un contrôle séparé
   cohorte: number;
 }
 
 const schema: yup.ObjectSchema<IFormInput> = yup.object({
   lettre_motivation: yup.string().required('Champ requis'),
   note_intention: yup.string().required('Résumé du mémoire requis'),
-  cv: yup.mixed<FileList>().required('CV requis'),                // ✅
-  diplome_fichier: yup.mixed<FileList>().required('Scan du diplôme requis'), // ✅
-  prototype: yup.mixed<FileList>().optional(),                    // ✅
+  cv: yup.mixed<FileList>().required('CV requis'),
+  diplome_fichier: yup.mixed<FileList>().required('Scan du diplôme requis'),
+  prototype: yup.mixed<FileList>().nullable().optional(),
   cohorte: yup.number().required('Veuillez choisir une cohorte'),
 });
 
@@ -38,6 +38,7 @@ export default function CampusSubmissionForm() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<IFormInput>({
     resolver: yupResolver(schema),
@@ -121,10 +122,29 @@ export default function CampusSubmissionForm() {
         <input type="file" accept=".pdf" {...register('diplome_fichier')} className="border rounded p-2 w-full" />
         {errors.diplome_fichier && <p className="text-red-500 text-sm">{errors.diplome_fichier.message}</p>}
       </div>
+
+      {/* Champ prototype avec Controller pour éviter l'erreur d'hydratation */}
       <div>
         <label className="block mb-1">Prototype / document additionnel (optionnel)</label>
-        <input type="file" {...register('prototype')} className="border rounded p-2 w-full" />
+        <Controller
+          name="prototype"
+          control={control}
+          render={({ field: { onChange, onBlur, ref, name } }) => (
+            <input
+              type="file"
+              name={name}
+              ref={ref}
+              onBlur={onBlur}
+              onChange={(e) => {
+                onChange(e.target.files);
+              }}
+              className="border rounded p-2 w-full"
+            />
+          )}
+        />
+        {errors.prototype && <p className="text-red-500 text-sm">{errors.prototype.message}</p>}
       </div>
+
       <button
         type="submit"
         disabled={loading}

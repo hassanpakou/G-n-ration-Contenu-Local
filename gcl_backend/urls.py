@@ -30,6 +30,8 @@ from ethique.views import (
     ComiteSurveillanceViewSet,
     AuditRapportViewSet,
 )
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from comptes.serializers import EmailTokenObtainPairSerializer
 
 router = DefaultRouter()
 router.register(r'hubs', HubViewSet)
@@ -52,7 +54,8 @@ router.register(r'cohortes', CohorteViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/login/', TokenObtainPairView.as_view(serializer_class=EmailTokenObtainPairSerializer),
+         name='token_obtain_pair'),
     path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/auth/', include('comptes.urls')),
     path('api/auth/login/', TokenObtainPairView.as_view(serializer_class=EmailTokenObtainPairSerializer), name='token_obtain_pair'),
