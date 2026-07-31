@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import GuichetCard from '@/components/GuichetCard';
 import OpportuniteInvestissementCard from '@/components/OpportuniteInvestissementCard';
 import NouvelleOpportuniteForm from '@/components/NouvelleOpportuniteForm';
+import Button from '@/components/Button';
 import { toast } from 'react-hot-toast';
 
 interface Guichet {
@@ -28,7 +29,7 @@ interface OpportuniteInvestissement {
 }
 
 export default function InvestirPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [guichets, setGuichets] = useState<Guichet[]>([]);
   const [opportunites, setOpportunites] = useState<OpportuniteInvestissement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,20 +60,26 @@ export default function InvestirPage() {
   };
 
   return (
-    <div>
-      <section className="mb-12 animate-fade-in">
-        <h1 className="text-3xl font-bold mb-4">Investir & Soutenir la Jeunesse</h1>
-        <p className="text-gray-600">
-          Trois guichets pour financer l&apos;innovation congolaise : du prototypage au
+    <div className="animate-fade-in space-y-12">
+      {/* En-tête */}
+      <div>
+        <h1 className="text-4xl font-bold text-primary-900 mb-2">
+          Investir & Soutenir la Jeunesse
+        </h1>
+        <div className="h-1 w-24 bg-gold-400 rounded-full mb-6" />
+        <p className="text-lg text-primary-700/80 max-w-3xl">
+          Trois guichets pour financer l'innovation congolaise : du prototypage au
           capital-développement, en passant par le fonds institutionnel GCL Seed Fund.
         </p>
-      </section>
+      </div>
 
-      {/* Affichage des guichets */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-6">Nos Guichets d&apos;Investissement</h2>
+      {/* Guichets */}
+      <section>
+        <h2 className="text-2xl font-semibold text-primary-900 mb-6">
+          Nos Guichets d'Investissement
+        </h2>
         {loading ? (
-          <p>Chargement...</p>
+          <p className="text-primary-600">Chargement...</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {guichets.map((guichet) => (
@@ -82,34 +89,42 @@ export default function InvestirPage() {
         )}
       </section>
 
-      {/* Bouton pour soumettre un projet (si authentifié) */}
+      {/* Bouton soumettre */}
       {isAuthenticated && (
-        <div className="mb-8">
-          <button
+        <div className="flex justify-center">
+          <Button
+            variant="secondary"
+            size="lg"
             onClick={() => setShowForm(!showForm)}
-            className="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700"
           >
             {showForm ? 'Fermer le formulaire' : 'Soumettre un projet à financer'}
-          </button>
-          {showForm && (
-            <div className="mt-6">
-              <NouvelleOpportuniteForm guichets={guichets} onSuccess={handleNouvelleOpportunite} />
-            </div>
-          )}
+          </Button>
         </div>
       )}
 
-      {/* Liste des opportunités */}
+      {showForm && (
+        <section className="glass-card p-6 rounded-2xl">
+          <NouvelleOpportuniteForm guichets={guichets} onSuccess={handleNouvelleOpportunite} />
+        </section>
+      )}
+
+      {/* Projets */}
       <section>
-        <h2 className="text-2xl font-semibold mb-6">Projets en recherche de financement</h2>
+        <h2 className="text-2xl font-semibold text-primary-900 mb-6">
+          Projets en recherche de financement
+        </h2>
         {loading ? (
-          <p>Chargement...</p>
+          <p className="text-primary-600">Chargement...</p>
         ) : opportunites.length === 0 ? (
           <p className="text-gray-500">Aucun projet pour le moment.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {opportunites.map((opp) => (
-              <OpportuniteInvestissementCard key={opp.id} opportunite={opp} guichets={guichets} />
+              <OpportuniteInvestissementCard
+                key={opp.id}
+                opportunite={opp}
+                guichets={guichets}
+              />
             ))}
           </div>
         )}

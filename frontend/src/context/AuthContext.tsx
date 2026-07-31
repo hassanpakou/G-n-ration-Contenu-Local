@@ -6,16 +6,17 @@ import { setTokens, clearTokens, getAccessToken, getRefreshToken } from '@/lib/a
 interface User {
   id: number;
   email: string;
-  // autres champs si besoin
+  isStaff: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: any) => Promise<void>;
+  register: (data: Record<string, unknown>) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -31,8 +32,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const access = getAccessToken();
       if (access) {
         try {
-          const res = await api.get('/auth/user/'); // endpoint à créer dans Django plus tard
-          setUser(res.data);
+          const res = await api.get('/auth/user/');
+          setUser({
+            id: res.data.id,
+            email: res.data.email,
+            isStaff: res.data.is_staff,
+          });
         } catch {
           clearTokens();
           setUser(null);
@@ -46,18 +51,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     const res = await api.post('/auth/login/', { email, password });
     setTokens(res.data.access, res.data.refresh);
-    // Récupérer les infos utilisateur après login (appel à un endpoint user si on l'a)
     const userRes = await api.get('/auth/user/');
-    setUser(userRes.data);
+    setUser({
+      id: userRes.data.id,
+      email: userRes.data.email,
+      isStaff: userRes.data.is_staff,
+    });
   };
 
-  const register = async (data: any) => {
+  const register = async (data: Record<string, unknown>) => {
     const res = await api.post('/auth/inscription/', data);
-    // Après inscription, on peut auto-login si l'API renvoie les tokens
     if (res.data.access) {
       setTokens(res.data.access, res.data.refresh);
       const userRes = await api.get('/auth/user/');
-      setUser(userRes.data);
+      setUser({
+        id: userRes.data.id,
+        email: userRes.data.email,
+        isStaff: userRes.data.is_staff,
+      });
     }
   };
 
@@ -67,9 +78,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const isAuthenticated = !!user;
+  const isAdmin = user?.isStaff ?? false;
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, isAuthenticated, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

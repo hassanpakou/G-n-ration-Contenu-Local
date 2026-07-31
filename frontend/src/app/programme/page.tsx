@@ -24,20 +24,23 @@ export default function ProgrammePage() {
   }, []);
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Programme Génération Contenu Local 2026</h1>
-      <p className="mb-6 text-gray-600">
-        Quatre hubs régionaux pour couvrir tout l&apos;espace Grand Katanga et former
+    <div className="animate-fade-in">
+      <h1 className="text-4xl font-bold text-primary-900 mb-2">
+        Programme GCL 2026
+      </h1>
+      <div className="h-1 w-24 bg-gold-400 rounded-full mb-6" />
+      <p className="text-lg text-primary-700/80 max-w-3xl mb-10">
+        Quatre hubs régionaux pour couvrir tout l'espace Grand Katanga et former
         les futurs entrepreneurs miniers.
       </p>
+
       {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* eslint-disable-next-line react/jsx-no-undef */}
-            <SkeletonCard count={2}/>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SkeletonCard count={2} />
+        </div>
       ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {hubs.map((hub) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {hubs.map((hub) => (
             <HubCard key={hub.id} hub={hub} />
           ))}
         </div>

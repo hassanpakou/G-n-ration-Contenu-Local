@@ -60,20 +60,26 @@ export default function EthiquePage() {
   }, []);
 
   return (
-    <div>
-      <section className="mb-12 animate-fade-in">
-        <h1 className="text-3xl font-bold mb-4">Confiance, Éthique & Gouvernance</h1>
-        <p className="text-gray-600">
+    <div className="animate-fade-in space-y-12">
+      {/* En-tête */}
+      <div>
+        <h1 className="text-4xl font-bold text-primary-900 mb-2">
+          Confiance, Éthique & Gouvernance
+        </h1>
+        <div className="h-1 w-24 bg-gold-400 rounded-full mb-6" />
+        <p className="text-lg text-primary-700/80 max-w-3xl">
           Transparence totale et tolérance zéro face à la corruption. Découvrez les instances
-          qui garantissent la bonne gestion des fonds et l&apos;intégrité du programme.
+          qui garantissent la bonne gestion des fonds et l'intégrité du programme.
         </p>
-      </section>
+      </div>
 
       {/* Conseil des Sages */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-6">Conseil des Sages</h2>
+      <section>
+        <h2 className="text-2xl font-semibold text-primary-900 mb-6">
+          Conseil des Sages
+        </h2>
         {loading ? (
-          <p>Chargement...</p>
+          <p className="text-primary-600">Chargement...</p>
         ) : conseil.length === 0 ? (
           <p className="text-gray-500">Aucun membre pour le moment.</p>
         ) : (
@@ -85,11 +91,13 @@ export default function EthiquePage() {
         )}
       </section>
 
-      {/* Comités de Surveillance */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-6">Comités de Surveillance Éthique</h2>
+      {/* Comités */}
+      <section>
+        <h2 className="text-2xl font-semibold text-primary-900 mb-6">
+          Comités de Surveillance Éthique
+        </h2>
         {loading ? (
-          <p>Chargement...</p>
+          <p className="text-primary-600">Chargement...</p>
         ) : comites.length === 0 ? (
           <p className="text-gray-500">Aucun comité enregistré.</p>
         ) : (
@@ -101,11 +109,13 @@ export default function EthiquePage() {
         )}
       </section>
 
-      {/* Rapports d'Audit */}
+      {/* Audits */}
       <section>
-        <h2 className="text-2xl font-semibold mb-6">Rapports d&apos;Audit</h2>
+        <h2 className="text-2xl font-semibold text-primary-900 mb-6">
+          Rapports d'Audit
+        </h2>
         {loading ? (
-          <p>Chargement...</p>
+          <p className="text-primary-600">Chargement...</p>
         ) : audits.length === 0 ? (
           <p className="text-gray-500">Aucun rapport publié.</p>
         ) : (

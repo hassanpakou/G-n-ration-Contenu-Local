@@ -6,6 +6,7 @@ import OpportuniteCard from '@/components/OpportuniteCard';
 import CorridorCard from '@/components/CorridorCard';
 import OffreServiceCard from '@/components/OffreServiceCard';
 import OffreServiceForm from '@/components/OffreServiceForm';
+import Button from '@/components/Button';
 import toast from 'react-hot-toast';
 
 interface Opportunite {
@@ -28,7 +29,7 @@ interface Corridor {
 
 interface OffreService {
   id: number;
-  pme: number; // ID de la PME
+  pme: number;
   pme_nom?: string;
   corridor: number;
   corridor_nom?: string;
@@ -39,7 +40,7 @@ interface OffreService {
 }
 
 export default function SousTraitancePage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [opportunites, setOpportunites] = useState<Opportunite[]>([]);
   const [corridors, setCorridors] = useState<Corridor[]>([]);
   const [offres, setOffres] = useState<OffreService[]>([]);
@@ -73,20 +74,26 @@ export default function SousTraitancePage() {
   };
 
   return (
-    <div>
-      <section className="mb-12 animate-fade-in">
-        <h1 className="text-3xl font-bold mb-4">Sous-traitance & Corridors</h1>
-        <p className="text-gray-600">
+    <div className="animate-fade-in space-y-12">
+      {/* En-tête */}
+      <div>
+        <h1 className="text-4xl font-bold text-primary-900 mb-2">
+          Sous-traitance & Corridors
+        </h1>
+        <div className="h-1 w-24 bg-gold-400 rounded-full mb-6" />
+        <p className="text-lg text-primary-700/80 max-w-3xl">
           Marchés B2B/B2G, opportunités de sous-traitance dans le secteur minier, et solutions
           logistiques le long des corridors stratégiques du Grand Katanga.
         </p>
-      </section>
+      </div>
 
-      {/* Opportunités de sous-traitance */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-6">Opportunités de sous-traitance</h2>
+      {/* Opportunités */}
+      <section>
+        <h2 className="text-2xl font-semibold text-primary-900 mb-6">
+          Opportunités de sous-traitance
+        </h2>
         {loading ? (
-          <p>Chargement...</p>
+          <p className="text-primary-600">Chargement...</p>
         ) : opportunites.length === 0 ? (
           <p className="text-gray-500">Aucune opportunité publiée pour le moment.</p>
         ) : (
@@ -98,11 +105,13 @@ export default function SousTraitancePage() {
         )}
       </section>
 
-      {/* Corridors logistiques */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-6">Corridors logistiques</h2>
+      {/* Corridors */}
+      <section>
+        <h2 className="text-2xl font-semibold text-primary-900 mb-6">
+          Corridors logistiques
+        </h2>
         {loading ? (
-          <p>Chargement...</p>
+          <p className="text-primary-600">Chargement...</p>
         ) : corridors.length === 0 ? (
           <p className="text-gray-500">Aucun corridor défini.</p>
         ) : (
@@ -114,28 +123,31 @@ export default function SousTraitancePage() {
         )}
       </section>
 
-      {/* Offres de services des PME */}
+      {/* Offres de services */}
       <section>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">Offres de services des PME</h2>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <h2 className="text-2xl font-semibold text-primary-900">
+            Offres de services des PME
+          </h2>
           {isAuthenticated && (
-            <button
+            <Button
+              variant="secondary"
               onClick={() => setShowForm(!showForm)}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              icon={showForm ? undefined : undefined}
             >
               {showForm ? 'Fermer' : 'Proposer une offre'}
-            </button>
+            </Button>
           )}
         </div>
 
         {showForm && (
-          <div className="mb-8">
+          <div className="mb-8 glass-card p-6 rounded-2xl">
             <OffreServiceForm corridors={corridors} onSuccess={handleOffreAjoutee} />
           </div>
         )}
 
         {loading ? (
-          <p>Chargement...</p>
+          <p className="text-primary-600">Chargement...</p>
         ) : offres.length === 0 ? (
           <p className="text-gray-500">Aucune offre de service pour le moment.</p>
         ) : (

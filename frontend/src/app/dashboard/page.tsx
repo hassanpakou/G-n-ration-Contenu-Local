@@ -5,8 +5,9 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
+import Button from '@/components/Button';
 
-// ---------- Types locaux ----------
+// ---------- Types ----------
 interface Dossier {
   id: number;
   cohorte: number;
@@ -38,18 +39,27 @@ interface OpportuniteInvest {
   date_creation: string;
 }
 
-// ---------- Composants d'affichage rapide ----------
+// ---------- Composants d'affichage ----------
 function DossierRow({ dossier }: { dossier: Dossier }) {
+  const statusColors = {
+    soumis: 'bg-yellow-100 text-yellow-800',
+    accepte: 'bg-green-100 text-green-800',
+    rejete: 'bg-red-100 text-red-800',
+  };
   return (
-    <div className="flex justify-between items-center p-3 bg-gray-50 rounded mb-2">
+    <div className="flex justify-between items-center p-4 glass-card rounded-xl">
       <div>
-        <span className="font-medium">Dossier #{dossier.id}</span>
-        <span className={`ml-3 text-xs px-2 py-1 rounded ${
-          dossier.statut === 'soumis' ? 'bg-yellow-100 text-yellow-800' :
-          dossier.statut === 'accepte' ? 'bg-green-100 text-green-800' :
-          'bg-gray-100 text-gray-800'
-        }`}>{dossier.statut}</span>
-        <p className="text-sm text-gray-500">{new Date(dossier.date_soumission).toLocaleDateString('fr-FR')}</p>
+        <span className="font-medium text-primary-900">Dossier #{dossier.id}</span>
+        <span
+          className={`ml-3 text-xs px-2 py-1 rounded-full ${
+            statusColors[dossier.statut as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'
+          }`}
+        >
+          {dossier.statut}
+        </span>
+        <p className="text-sm text-primary-600/70">
+          {new Date(dossier.date_soumission).toLocaleDateString('fr-FR')}
+        </p>
       </div>
     </div>
   );
@@ -57,13 +67,17 @@ function DossierRow({ dossier }: { dossier: Dossier }) {
 
 function PMERow({ pme }: { pme: PMEItem }) {
   return (
-    <div className="flex justify-between items-center p-3 bg-gray-50 rounded mb-2">
+    <div className="flex justify-between items-center p-4 glass-card rounded-xl">
       <div>
-        <span className="font-medium">{pme.nom}</span>
-        <span className="text-sm text-gray-500 ml-3">{pme.secteur_activite}</span>
-        <span className={`ml-3 text-xs px-2 py-1 rounded ${
-          pme.statut_arsp === 'obtenue' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-        }`}>{pme.statut_arsp}</span>
+        <span className="font-medium text-primary-900">{pme.nom}</span>
+        <span className="text-sm text-primary-600/70 ml-3">{pme.secteur_activite}</span>
+        <span
+          className={`ml-3 text-xs px-2 py-1 rounded-full ${
+            pme.statut_arsp === 'obtenue' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+          }`}
+        >
+          {pme.statut_arsp}
+        </span>
       </div>
     </div>
   );
@@ -71,10 +85,10 @@ function PMERow({ pme }: { pme: PMEItem }) {
 
 function OffreRow({ offre }: { offre: OffreService }) {
   return (
-    <div className="flex justify-between items-center p-3 bg-gray-50 rounded mb-2">
+    <div className="flex justify-between items-center p-4 glass-card rounded-xl">
       <div>
-        <span className="font-medium">Offre #{offre.id}</span>
-        <p className="text-sm text-gray-500">{offre.description_service.slice(0, 80)}...</p>
+        <span className="font-medium text-primary-900">Offre #{offre.id}</span>
+        <p className="text-sm text-primary-600/70">{offre.description_service.slice(0, 80)}...</p>
       </div>
     </div>
   );
@@ -82,10 +96,12 @@ function OffreRow({ offre }: { offre: OffreService }) {
 
 function InvestRow({ opp }: { opp: OpportuniteInvest }) {
   return (
-    <div className="flex justify-between items-center p-3 bg-gray-50 rounded mb-2">
+    <div className="flex justify-between items-center p-4 glass-card rounded-xl">
       <div>
-        <span className="font-medium">{opp.titre}</span>
-        <span className="text-sm text-gray-500 ml-3">{Number(opp.montant_recherche).toLocaleString()} USD</span>
+        <span className="font-medium text-primary-900">{opp.titre}</span>
+        <span className="text-sm text-primary-600/70 ml-3">
+          {Number(opp.montant_recherche).toLocaleString()} USD
+        </span>
       </div>
     </div>
   );
@@ -113,7 +129,6 @@ export default function DashboardPage() {
 
     const fetchDashboardData = async () => {
       try {
-        // Récupérer l'ID du candidat via /auth/user/
         const userRes = await api.get('/auth/user/');
         const candidatId = userRes.data.candidat_id;
 
@@ -125,10 +140,15 @@ export default function DashboardPage() {
             api.get('/opportunites-investissement/'),
           ]);
 
-          // Filtrer les données appartenant au candidat connecté
           setDossiers(dossiersRes.data.filter((d: any) => d.candidat === candidatId));
           setPmes(pmesRes.data.filter((p: any) => p.fondateurs.includes(candidatId)));
-          setOffres(offresRes.data.filter((o: any) => o.pme && pmesRes.data.some((p: any) => p.id === o.pme && p.fondateurs.includes(candidatId))));
+          setOffres(
+            offresRes.data.filter(
+              (o: any) =>
+                o.pme &&
+                pmesRes.data.some((p: any) => p.id === o.pme && p.fondateurs.includes(candidatId))
+            )
+          );
           setOpportunites(oppRes.data.filter((o: any) => o.candidat === candidatId));
         }
       } catch (err) {
@@ -144,55 +164,63 @@ export default function DashboardPage() {
 
   if (authLoading || dataLoading) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <p>Chargement de votre tableau de bord...</p>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <p className="text-primary-600">Chargement de votre tableau de bord...</p>
       </div>
     );
   }
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-3xl font-bold mb-2">Tableau de bord</h1>
-      <div className="h-1 w-20 bg-gold-400 mb-6"></div>
+      <h1 className="text-3xl font-bold text-primary-900 mb-2">Tableau de bord</h1>
+      <div className="h-1 w-20 bg-gold-400 rounded-full mb-8" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Section Dossiers */}
-        <section className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-xl font-semibold mb-4">Mes dossiers de candidature</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Dossiers */}
+        <section className="glass-card p-6 rounded-2xl">
+          <h2 className="text-xl font-semibold text-primary-900 mb-4">
+            Mes dossiers de candidature
+          </h2>
           {dossiers.length === 0 ? (
-            <p className="text-gray-500">Aucun dossier soumis.</p>
+            <p className="text-primary-600/70">Aucun dossier soumis.</p>
           ) : (
-            dossiers.map((d) => <DossierRow key={d.id} dossier={d} />)
+            <div className="space-y-3">{dossiers.map((d) => <DossierRow key={d.id} dossier={d} />)}</div>
           )}
         </section>
 
-        {/* Section PME */}
-        <section className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-xl font-semibold mb-4">Mes PME</h2>
+        {/* PME */}
+        <section className="glass-card p-6 rounded-2xl">
+          <h2 className="text-xl font-semibold text-primary-900 mb-4">Mes PME</h2>
           {pmes.length === 0 ? (
-            <p className="text-gray-500">Aucune PME créée.</p>
+            <p className="text-primary-600/70">Aucune PME créée.</p>
           ) : (
-            pmes.map((p) => <PMERow key={p.id} pme={p} />)
+            <div className="space-y-3">{pmes.map((p) => <PMERow key={p.id} pme={p} />)}</div>
           )}
         </section>
 
-        {/* Section Offres de service */}
-        <section className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-xl font-semibold mb-4">Mes offres de service</h2>
+        {/* Offres */}
+        <section className="glass-card p-6 rounded-2xl">
+          <h2 className="text-xl font-semibold text-primary-900 mb-4">
+            Mes offres de service
+          </h2>
           {offres.length === 0 ? (
-            <p className="text-gray-500">Aucune offre proposée.</p>
+            <p className="text-primary-600/70">Aucune offre proposée.</p>
           ) : (
-            offres.map((o) => <OffreRow key={o.id} offre={o} />)
+            <div className="space-y-3">{offres.map((o) => <OffreRow key={o.id} offre={o} />)}</div>
           )}
         </section>
 
-        {/* Section Opportunités d'investissement */}
-        <section className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-xl font-semibold mb-4">Mes propositions d&apos;investissement</h2>
+        {/* Investissements */}
+        <section className="glass-card p-6 rounded-2xl">
+          <h2 className="text-xl font-semibold text-primary-900 mb-4">
+            Mes propositions d'investissement
+          </h2>
           {opportunites.length === 0 ? (
-            <p className="text-gray-500">Aucune proposition.</p>
+            <p className="text-primary-600/70">Aucune proposition.</p>
           ) : (
-            opportunites.map((o) => <InvestRow key={o.id} opp={o} />)
+            <div className="space-y-3">
+              {opportunites.map((o) => <InvestRow key={o.id} opp={o} />)}
+            </div>
           )}
         </section>
       </div>
