@@ -4,17 +4,22 @@ from dotenv import load_dotenv
 import dj_database_url
 from datetime import timedelta
 
-load_dotenv()  # charge les variables depuis .env
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Variables sensibles lues depuis l'environnement
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+# Récupère ALLOWED_HOSTS depuis l'env ou utilise une valeur par défaut
+allowed_hosts = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# Ajoute automatiquement les domaines Vercel en production (si non déjà présents)
+if not DEBUG:
+    vercel_domains = ['gcl2026.vercel.app', '.vercel.app']
+    allowed_hosts.extend([d for d in vercel_domains if d not in allowed_hosts])
+
+ALLOWED_HOSTS = allowed_hosts
 # Application definition
 
 INSTALLED_APPS = [
